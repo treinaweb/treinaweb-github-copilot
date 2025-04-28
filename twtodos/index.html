@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo Application</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-5">Todo Application</h1>
+      <div class="input-group mb-3">
+        <input
+          type="text"
+          class="form-control"
+          id="todoInput"
+          placeholder="Add a new todo"
+        />
+        <button class="btn btn-primary" id="addTodoBtn">Add</button>
+      </div>
+      <ul class="list-group" id="todoList"></ul>
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-danger" id="clearAllBtn">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/scripts.js"></script>
+  </body>
+</html>

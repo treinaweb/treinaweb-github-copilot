@@ -1,0 +1,168 @@
+@baseUrl = http://localhost:3000/api
+@token = {{login.response.body.token}}
+
+### Variables for testing
+@username = johndoe
+@password = Password@123
+@email = johndoe@example.com
+@expenseId = {{createExpense.response.body.id}}
+
+### Register a new user
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}",
+  "email": "{{email}}"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### Create a new expense
+# @name createExpense
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 100.50,
+  "description": "Grocery shopping",
+  "category": "GROCERIES"
+}
+
+### Get all expenses
+GET {{baseUrl}}/expenses
+Authorization: Bearer {{token}}
+
+### Get all expenses with filters
+GET {{baseUrl}}/expenses?category=GROCERIES&startDate=2023-01-01&endDate=2023-12-31
+Authorization: Bearer {{token}}
+
+### Get expense by ID
+GET {{baseUrl}}/expenses/{{expenseId}}
+Authorization: Bearer {{token}}
+
+### Update expense
+PUT {{baseUrl}}/expenses/{{expenseId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 120.75,
+  "description": "Updated grocery shopping",
+  "category": "GROCERIES"
+}
+
+### Delete expense
+DELETE {{baseUrl}}/expenses/{{expenseId}}
+Authorization: Bearer {{token}}
+
+### Test with different expense categories
+
+### Create LEISURE expense
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 50.00,
+  "description": "Movie tickets",
+  "category": "LEISURE"
+}
+
+### Create ELECTRONICS expense
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 999.99,
+  "description": "New smartphone",
+  "category": "ELECTRONICS"
+}
+
+### Create UTILITIES expense
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 120.00,
+  "description": "Electricity bill",
+  "category": "UTILITIES"
+}
+
+### Create CLOTHING expense
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 89.99,
+  "description": "New shoes",
+  "category": "CLOTHING"
+}
+
+### Create HEALTH expense
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 45.00,
+  "description": "Pharmacy",
+  "category": "HEALTH"
+}
+
+### Create OTHERS expense
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 30.00,
+  "description": "Miscellaneous",
+  "category": "OTHERS"
+}
+
+### Testing validation errors
+
+### Register with missing fields
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser"
+}
+
+### Login with incorrect credentials
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "nonexistent",
+  "password": "wrongpassword"
+}
+
+### Create expense with invalid data
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": -10.00,
+  "category": "INVALID_CATEGORY"
+}
+
+### Access expense without authentication
+GET {{baseUrl}}/expenses

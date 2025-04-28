@@ -1,0 +1,477 @@
+openapi: 3.1.0
+info:
+  title: Expense Tracker API
+  description: API for tracking expenses
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+tags:
+  - name: Auth
+    description: Authentication related endpoints
+  - name: Expenses
+    description: Expense related endpoints
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: User registered successfully
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                message: Validation error
+                errors:
+                  username:
+                    - Username is required
+                  password:
+                    - Password must be at least 8 characters long
+                  email:
+                    - Email format is invalid
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                message: Validation error
+                errors:
+                  username:
+                    - Username is required
+                  password:
+                    - Password is required
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Invalid credentials
+
+  /api/expenses:
+    get:
+      tags:
+        - Expenses
+      summary: Get all expenses
+      security:
+        - JWT: []
+      parameters:
+        - name: category
+          in: query
+          description: Filter expenses by category
+          required: false
+          schema:
+            type: string
+            enum:
+              - GROCERIES
+              - LEISURE
+              - ELECTRONICS
+              - UTILITIES
+              - CLOTHING
+              - HEALTH
+              - OTHERS
+            example: GROCERIES
+        - name: startDate
+          in: query
+          description: Start date for filtering expenses
+          required: false
+          schema:
+            type: string
+            format: date
+            example: 2023-10-01
+        - name: endDate
+          in: query
+          description: End date for filtering expenses
+          required: false
+          schema:
+            type: string
+            format: date
+            example: 2023-10-31
+      responses:
+        "200":
+          description: A list of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExpenseResponse"
+                example:
+                  - id: 123e4567-e89b-12d3-a456-426614174000
+                    amount: 100.50
+                    category: GROCERIES
+                    createdAt: 2023-10-01T12:00:00Z
+                  - id: 123e4567-e89b-12d3-a456-426614174001
+                    amount: 50.00
+                    category: LEISURE
+                    createdAt: 2023-10-02T12:00:00Z
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Unauthorized access
+
+    post:
+      tags:
+        - Expenses
+      summary: Create a new expense
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseRequest"
+      responses:
+        "201":
+          description: Expense created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                message: Validation error
+                errors:
+                  amount:
+                    - Amount is required
+                    - Amount must be a positive number
+                  category:
+                    - Category is required
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Unauthorized access
+
+  /api/expenses/{id}:
+    get:
+      tags:
+        - Expenses
+      summary: Get an expense by ID
+      security:
+        - JWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the expense to retrieve
+          schema:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        "200":
+          description: Expense retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Unauthorized access
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: You do not have permission to access this resource
+        "404":
+          description: Expense not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Expense not found
+
+    put:
+      tags:
+        - Expenses
+      summary: Update an expense by ID
+      security:
+        - JWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the expense to update
+          schema:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseRequest"
+      responses:
+        "200":
+          description: Expense updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                message: Validation error
+                errors:
+                  amount:
+                    - Amount is required
+                    - Amount must be a positive number
+                  category:
+                    - Category is required
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Unauthorized access
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: You do not have permission to access this resource
+        "404":
+          description: Expense not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Expense not found
+
+    delete:
+      tags:
+        - Expenses
+      summary: Delete an expense by ID
+      security:
+        - JWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the expense to delete
+          schema:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+      responses:
+        "200":
+          description: Expense deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Expense deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Unauthorized access
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: You do not have permission to access this resource
+        "404":
+          description: Expense not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Expense not found
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: johndoe
+        password:
+          type: string
+          example: password@123
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+      required:
+        - username
+        - password
+        - email
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: johndoe
+        password:
+          type: string
+          example: password@123
+      required:
+        - username
+        - password
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          format: jwt
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    ExpenseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        amount:
+          type: number
+          format: float
+          example: 100.50
+        description:
+          type: string
+          example: Grocery shopping
+        category:
+          type: string
+          enum:
+            - GROCERIES
+            - LEISURE
+            - ELECTRONICS
+            - UTILITIES
+            - CLOTHING
+            - HEALTH
+            - OTHERS
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-10-01T12:00:00Z
+    ExpenseRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+          example: 100.50
+        description:
+          type: string
+          example: Grocery shopping
+        category:
+          type: string
+          enum:
+            - GROCERIES
+            - LEISURE
+            - ELECTRONICS
+            - UTILITIES
+            - CLOTHING
+            - HEALTH
+            - OTHERS
+      required:
+        - amount
+        - category
+        - description
+
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
